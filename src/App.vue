@@ -4,12 +4,16 @@ import {ref} from "vue";
   const showModal = ref(false);
   const newNote = ref("");
   const notes = ref([]);
+  const errorMsg = ref("");
 
   function getRandomColor() {
     return "hsl(" + Math.random() * 360 + ", 100%, 75%)";
   }
 
   const addNote = () => {
+    if (newNote.value.length <= 9){
+      return errorMsg.value = "Note needs to be 10 characters or more.";
+    }
     notes.value.push({
       id: Math.floor(Math.random() * 100000),
       text: newNote.value,
@@ -18,6 +22,7 @@ import {ref} from "vue";
     });
     showModal.value = false;
     newNote.value = "";
+    errorMsg.value = "";
   }
 </script>
 
@@ -25,7 +30,8 @@ import {ref} from "vue";
   <main>
     <div v-show="showModal" class="overlay">
       <div class="modal">
-        <textarea v-model="newNote" name="note" id="note" cols="30" rows="10"></textarea>
+        <textarea v-model.trim="newNote" name="note" id="note" cols="30" rows="10"></textarea>
+        <p v-if="errorMsg">{{errorMsg}}</p>
         <button @click="addNote">Add Note</button>
         <button @click="showModal = false" class="close">Close</button>
       </div>
@@ -36,13 +42,14 @@ import {ref} from "vue";
         <button @click="showModal = true">+</button>
       </header>
       <div class="cards-container">
-        <div class="card">
-          <p class="main-text"> consequatur doloremque ea ex hic illo, impedit iusto laudantium nesciunt nihil nulla obcaecati quia quis quo reprehenderit tenetur voluptatem.</p>
-          <p class="date">3223</p>
-        </div>
-        <div class="card">
-          <p class="main-text"> consequatur doloremque ea ex hic illo, impedit iusto laudantium nesciunt nihil nulla obcaecati quia quis quo reprehenderit tenetur voluptatem.</p>
-          <p class="date">3223</p>
+        <div
+            v-for="note in notes"
+            :key="note.id"
+            class="card"
+            :style="{backgroundColor: note.backgroundColor}
+        ">
+          <p class="main-text">{{note.text}}</p>
+          <p class="date">{{note.date.toLocaleDateString("en-US")}}</p>
         </div>
       </div>
     </div>
@@ -134,5 +141,8 @@ import {ref} from "vue";
   .modal .close {
     background-color: rgb(193, 15, 15);
     margin-top: 7px;
+  }
+  .modal p{
+    color: red;
   }
 </style>
